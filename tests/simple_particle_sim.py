@@ -15,15 +15,13 @@ TFT_CS = board.D24
 TFT_DC = board.D25
 RST = board.D7
 
-# Define screen dimensions
+# Define screen dimensions in pixels
 WIDTH = 480
 HEIGHT = 320
 
 # Particle Attributes
 NUM_PARTICLES = 50
 MAX_PARTICLE_SPEED = 20
-
-
 
 # Display object
 display_bus = displayio.FourWire(SPI, command=TFT_DC, chip_select=TFT_CS, reset=RST)
