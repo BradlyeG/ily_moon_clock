@@ -46,7 +46,7 @@ class Particle:
 
     def is_out_of_bounds(self, screen_x, screen_y):
         """
-        Check if the particles are .
+        Check if the particles are out of bounds.
  
         Parameters:
             None
@@ -80,6 +80,8 @@ class ParticleSystem(displayio.TileGrid):
 
         """
         bitmap = displayio.Bitmap(screen_width, screen_height, 2)
+        self.screen_width = screen_width
+        self.screen_height = screen_height
         palette = displayio.Palette(2)
         palette[0] = 0x000000  # Background color (black)
         palette[1] = 0xFFFFFF  # Particle color (white)
@@ -89,38 +91,52 @@ class ParticleSystem(displayio.TileGrid):
 
         # Initialize particles
         self.particles = [Particle(start_x, start_y, p_behavior[0], p_behavior[1]) for _ in range(num_particles)]
+        self.p_behavior = p_behavior
 
     def update(self):
+        """
+        Update each particle in the particle system, calling each particle's move() function. 
+        This function updates pixels on the screen and the display should be refreshed soon after update.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         for particle in self.particles:
             particle.move()
-            if particle.x + particle.dx < 0 :
-                self.bitmap[particle.ppos, particle.y] = 0
+            if particle.x + particle.dx < 0 or particle.y + particle.dy < 0:
+                self.bitmap[particle.px, particle.py] = 0
             else:
                 self.bitmap[particle.x, particle.y] = 1
-                self.bitmap[particle.ppos, particle.y] = 0
+                self.bitmap[particle.px, particle.py] = 0
 
     def remove_out_of_bounds(self):
+        """
+        Check if each particle is out of bounds, and if so remove them from the system.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         num_stale_particles = len(self.particles)
         self.particles = [particle for particle in self.particles if not particle.is_out_of_bounds()]
         for dead_particle in range(0,num_stale_particles-len(self.particles)):
-            self.particles.append(Particle(WIDTH - 1, random.randint(0, HEIGHT - 1), MAX_PARTICLE_SPEED))
+            self.particles.append(Particle(self.screen_width - 1, random.randint(0, self.screen_height - 1), self.p_behavior[0], self.p_behavior[1]))
 
     def print_particle_list(self):
+        """
+        Print out the list of particles and their attributes.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         for particle in self.particles:
-            print("Particle: {: >20} X: {: >20} {: >20} {: >20} {: >20}".format(self.particles.index(particle), particle.x, particle.y, particle.ppos, particle.dx))
-
-particle_system = ParticleSystem(NUM_PARTICLES, HEIGHT, WIDTH)
-group = displayio.Group()
-group.append(particle_system)
-display.show(group)
-
-while True:
-    # Update and draw particles
-    particle_system.update()
-    particle_system.remove_out_of_bounds()
-
-    # Redraw the TileGrid to display the updated particles
-    display.refresh()
-
-    # Wait for a short time to control the speed of the effect
-    time.sleep(0.01)
+            print("Particle: {: >20} X: {: >20} Y: {: >20} Previous X: {: >20} Previous Y: {: >20} X Velocity: {: >20} Y Velocity{: >20}".format(
+                self.particles.index(particle), particle.x, particle.y, particle.px, particle.py, particle.dx, particle.dy))
