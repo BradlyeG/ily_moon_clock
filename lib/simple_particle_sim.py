@@ -66,7 +66,7 @@ class ParticleSystem(displayio.TileGrid):
         num_particles (int): The number of particles in the particle system.
         p_behavior (list): A list of two elements that are used to define the x and y velocity of particles in pixels.
     """
-    def __init__(self, num_particles: int, screen_height: int, screen_width: int, p_behavior: list, start_x: int, start_y: int):
+    def __init__(self, num_particles: int, screen_height: int, screen_width: int, p_behavior: list, start_x: int, start_y: int, rand_x: bool = False, rand_y: bool = False):
         """
         Initializes a TileGrid that contains the particles and updates them.
  
@@ -77,6 +77,8 @@ class ParticleSystem(displayio.TileGrid):
             p_behavior (list):
             start_x (int):
             start_y (int):
+            rand_x (bool):
+            rand_y (bool):
 
         """
         bitmap = displayio.Bitmap(screen_width, screen_height, 2)
@@ -90,7 +92,14 @@ class ParticleSystem(displayio.TileGrid):
         super().__init__(bitmap, pixel_shader=palette)
 
         # Initialize particles
-        self.particles = [Particle(start_x, start_y, p_behavior[0], p_behavior[1]) for _ in range(num_particles)]
+        if rand_x and rand_y:
+            self.particles = [Particle(random.randrange(0, screen_width - 1), random.randrange(0, screen_height), p_behavior[0], p_behavior[1]) for _ in range(num_particles)]
+        elif rand_x:
+            self.particles = [Particle(random.randrange(0, screen_width - 1), start_y, p_behavior[0], p_behavior[1]) for _ in range(num_particles)]
+        elif rand_y:
+            self.particles = [Particle(start_x, random.randrange(0, screen_height), p_behavior[0], p_behavior[1]) for _ in range(num_particles)]
+        else:
+            self.particles = [Particle(start_x, start_y, p_behavior[0], p_behavior[1]) for _ in range(num_particles)]
         self.p_behavior = p_behavior
 
     def update(self):
