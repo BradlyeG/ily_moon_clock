@@ -79,7 +79,7 @@ art_palette.make_transparent(0)
 # Create tile grids for earth, moon, rocket
 earth_tile_grid = displayio.TileGrid(art_sprite, pixel_shader=art_palette, width = 2, height = 2, tile_width = TILE_WIDTH, tile_height = TILE_HEIGHT)
 moon_tile_grid = displayio.TileGrid(art_sprite, pixel_shader=art_palette, width = 2, height = 2, tile_width = TILE_WIDTH, tile_height = TILE_HEIGHT)
-rocket_tile_grid = RotatableTileGrid(art_sprite, pixel_shader=art_palette, width = 2, height = 2, tile_width = TILE_WIDTH, tile_height = TILE_HEIGHT, max_cols=ROCKET_COLORS)
+#rocket_tile_grid = RotatableTileGrid(art_sprite, pixel_shader=art_palette, width = 2, height = 2, tile_width = TILE_WIDTH, tile_height = TILE_HEIGHT, max_cols=ROCKET_COLORS)
 
 # Set the tiles of each tile grid from the sprite sheet
 for index in range(len(earth_index)):
@@ -88,15 +88,15 @@ for index in range(len(earth_index)):
 for index in range(len(moon_index)):
     moon_tile_grid[index] = moon_index[index]
 
-for index in range(len(rocket_index)):
-    rocket_tile_grid[index] = rocket_index[index]
+#for index in range(len(rocket_index)):
+    #rocket_tile_grid[index] = rocket_index[index]
 
 # Create group for earth, and moon, then separate for rocket and append TGs to groups
 planet_group = displayio.Group()
 rocket_group = displayio.Group()
 planet_group.append(earth_tile_grid)
 planet_group.append(moon_tile_grid)
-rocket_group.append(rocket_tile_grid)
+#rocket_group.append(rocket_tile_grid)
 
 # Set position of tile grids within their group
 earth_tile_grid.x = 0
