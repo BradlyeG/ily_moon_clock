@@ -180,8 +180,9 @@ async def main():
     # Let it run 
     await asyncio.gather(timer_task)
 
-    # doing other stuff
-    time.sleep(3.0)
+    # Update particles
+    particle_system.update()
+    particle_system.remove_out_of_bounds()
     display.refresh()
 
 
