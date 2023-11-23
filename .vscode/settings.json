@@ -1,8 +1,13 @@
 {
     "python.analysis.extraPaths": [
         "",
-        "c:\\Users\\Brad\\.vscode\\extensions\\joedevivo.vscode-circuitpython-0.1.20-win32-x64\\stubs",
-        "c:\\Users\\Brad\\AppData\\Roaming\\Code\\User\\globalStorage\\joedevivo.vscode-circuitpython\\bundle\\20231115\\adafruit-circuitpython-bundle-py-20231115\\lib",
+        "/Users/brad/.vscode/extensions/joedevivo.vscode-circuitpython-0.1.20-darwin-x64/stubs",
+        "/Users/brad/Library/Application Support/Code/User/globalStorage/joedevivo.vscode-circuitpython/bundle/20231121/adafruit-circuitpython-bundle-py-20231121/lib",
         "./lib"
-    ]
+    ],
+    "python.languageServer": "Pylance",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingModuleSource": "none"
+    },
+    "circuitpython.board.version": "8.2.6"
 }
