@@ -8,12 +8,12 @@ import busio
 import asyncio
 import adafruit_pcf8523
 import adafruit_pcf8523_timer
-import terminalio
 import simple_particle_sim
 import adafruit_imageload
 from os import remove
 from adafruit_hx8357 import HX8357
 from adafruit_display_text import label
+from adafruit_bitmap_font import bitmap_font
 
 # Release any resources currently in use for the displays
 displayio.release_displays()
@@ -28,7 +28,7 @@ TWO_TILE_PAD = 32 # The number of pixels in 2 tiles on one axis
 ROCKET_COLORS = 6 # The number of unique colors in the rocket
 EPOCH_CYCLE = 1 # Number of times light has hit the moon and back from Marriage timestamp to program save
 NUM_PARTICLES = 50 # Number of particles to maintain in the particle sim
-MAX_PARTICLE_SPEED = 20 # Max speed of particles in pixels per update
+MAX_PARTICLE_SPEED = -35 # Max speed of particles in pixels per update
 
 # Component Pins
 spi = board.SPI()
@@ -48,10 +48,10 @@ timer = adafruit_pcf8523_timer.Timer(rtc.i2c_device)
 
 # Label config
 header_label_text = "I love you to the moon and back" 
-font = terminalio.FONT
+font = bitmap_font.load_font("art/pp_opt-16.bdf")
 text_color = 0x0000FF
-header = label.Label(font, text=header_label_text, color=text_color, scale = 2)
-counter_label = label.Label(font, text="0 times!", color=text_color, scale = 2)
+header = label.Label(font, text=header_label_text, color=text_color, scale = 1)
+counter_label = label.Label(font, text="0 times!", color=text_color, scale = 1)
 text_group = displayio.Group()
 text_group.append(header)
 text_group.append(counter_label)
@@ -64,7 +64,7 @@ counter_label.x = 10 * TILE_WIDTH
 counter_label.y = 14 * TILE_HEIGHT
 
 # Particle system config
-particle_system = simple_particle_sim.ParticleSystem(NUM_PARTICLES, SCREEN_HEIGHT, SCREEN_WIDTH, [randrange(0,MAX_PARTICLE_SPEED), 0], SCREEN_WIDTH - 1, 0, rand_y=True)
+particle_system = simple_particle_sim.ParticleSystem(NUM_PARTICLES, SCREEN_HEIGHT, SCREEN_WIDTH, MAX_PARTICLE_SPEED, 0, 0, 0, SCREEN_WIDTH - 1, 0, rand_y=True)
 
 # Planet and Rocket config
 # Create list for tile indicies from sprite sheet
@@ -181,9 +181,11 @@ async def main():
     await asyncio.gather(timer_task)
 
     # Update particles
-    particle_system.update()
     particle_system.remove_out_of_bounds()
+    particle_system.update()
     display.refresh()
+
+    time.sleep(1.0)
 
 
 # refresh the display after everything is set up
