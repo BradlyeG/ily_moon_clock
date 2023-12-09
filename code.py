@@ -57,11 +57,11 @@ text_group.append(header)
 text_group.append(counter_label)
 
 # Set the label of the locations
-header.x = 3 * TILE_WIDTH
+header.x = int(4.75 * TILE_WIDTH)
 header.y = 2 * TILE_HEIGHT
 
-counter_label.x = 10 * TILE_WIDTH
-counter_label.y = 14 * TILE_HEIGHT
+counter_label.x = 12 * TILE_WIDTH
+counter_label.y = 8 * TILE_HEIGHT
 
 # Particle system config
 particle_system = simple_particle_sim.ParticleSystem(NUM_PARTICLES, SCREEN_HEIGHT, SCREEN_WIDTH, MAX_PARTICLE_SPEED, 0, 0, 0, SCREEN_WIDTH - 1, 0, rand_y=True)
@@ -78,9 +78,8 @@ art_palette.make_transparent(0)
 
 # Create tile grids for earth, moon, rocket
 earth_tile_grid = displayio.TileGrid(art_sprite, pixel_shader=art_palette, width = 2, height = 2, tile_width = TILE_WIDTH, tile_height = TILE_HEIGHT)
-moon_tile_grid = displayio.TileGrid(art_sprite, pixel_shader=art_palette, width = 2, height = 2, tile_width = TILE_WIDTH, tile_height = TILE_HEIGHT)
-#rocket_tile_grid = RotatableTileGrid(art_sprite, pixel_shader=art_palette, width = 2, height = 2, tile_width = TILE_WIDTH, tile_height = TILE_HEIGHT, max_cols=ROCKET_COLORS)
-#rocket_tile_grid = RotatableTileGrid(art_sprite, pixel_shader=art_palette, width = 2, height = 2, tile_width = TILE_WIDTH, tile_height = TILE_HEIGHT, max_cols=ROCKET_COLORS)
+moon_tile_grid = displayio.TileGrid(art_sprite, pixel_shader=art_palette, width = 2, height = 2, tile_width = TILE_WIDTH, tile_height = TILE_HEIGHT) 
+rocket_tile_grid = displayio.TileGrid(art_sprite, pixel_shader=art_palette, width = 2, height = 2, tile_width = TILE_WIDTH, tile_height = TILE_HEIGHT)
 
 # Set the tiles of each tile grid from the sprite sheet
 for index in range(len(earth_index)):
@@ -89,38 +88,39 @@ for index in range(len(earth_index)):
 for index in range(len(moon_index)):
     moon_tile_grid[index] = moon_index[index]
 
-'''for index in range(len(rocket_index)):
+for index in range(len(rocket_index)):
     rocket_tile_grid[index] = rocket_index[index]
-'''
+
 # Create group for earth, and moon, then separate for rocket and append TGs to groups
 planet_group = displayio.Group()
-#rocket_group = displayio.Group()
+rocket_group = displayio.Group()
 planet_group.append(earth_tile_grid)
 planet_group.append(moon_tile_grid)
-#rocket_group.append(rocket_tile_grid)
-#rocket_group.append(rocket_tile_grid)
+rocket_group.append(rocket_tile_grid)
+
 
 # Set position of tile grids within their group
 earth_tile_grid.x = 0
 moon_tile_grid.x = int((SCREEN_WIDTH/PLANET_SCALE) - (moon_tile_grid.width * TILE_WIDTH)) # Because the layer is scaled up we effectively have less screen space in the x direction - divide width by scale then subtract the width of the object to get to other corner
-#rocket_tile_grid.x = int(SCREEN_WIDTH / 3)
+
+# Set the rotation of the rocket
+rocket_tile_grid.transpose_xy = True
+rocket_tile_grid.flip_y = True
 
 # Set position of groups
 planet_group.y = int(SCREEN_HEIGHT - (earth_tile_grid.height * TILE_HEIGHT * PLANET_SCALE))
-#rocket_group.x = int(SCREEN_WIDTH / 6)
-#rocket_group.y = int(SCREEN_HEIGHT / 2)
+rocket_group.x = 8 * TILE_WIDTH
+rocket_group.y = 15 * TILE_HEIGHT
 
 # Scale up the planet group so the planets are bigger
 planet_group.scale = PLANET_SCALE
 
-# Need to make a list of points for the rocket to follow. X, y, rotation
-#rocket_anim_pts = [(int((earth_tile_grid.width*PLANET_SCALE*TILE_WIDTH) - TWO_TILE_PAD), 
-#                    int(planet_group.y - TWO_TILE_PAD), 30), (int(SCREEN_WIDTH/3 + TWO_TILE_PAD),int(SCREEN_HEIGHT/5), 60), 
-#                    (int((moon_tile_grid.x * PLANET_SCALE) - TWO_TILE_PAD), int(planet_group.y - TWO_TILE_PAD), 40),(int(SCREEN_WIDTH/3 + TWO_TILE_PAD),int(SCREEN_HEIGHT/5), 140)]
+# Need to make a list of points for the rocket to follow - x direction only
+#rocket_anim_pts = [8,12,16,20]
 
 planet_rocket = displayio.Group()
 planet_rocket.append(planet_group)
-#planet_rocket.append(rocket_group)
+planet_rocket.append(rocket_group)
 
 # Show everything we need to show
 # Root layer - Particle System
@@ -173,7 +173,7 @@ async def on_timer(timer_status, clock, label):
         pass
             
 
-async def main():
+async def main(rtg):
     # Create the timer task
     timer_task = asyncio.create_task(on_timer(timer.timer_status, rtc, counter_label))
     
@@ -183,15 +183,26 @@ async def main():
     # Update particles
     particle_system.remove_out_of_bounds()
     particle_system.update()
+
+    if rtg.x < (12 * TILE_WIDTH) and rtg.flip_y:
+        rtg.x += (4 * TILE_WIDTH)
+    elif rtg.x == (12 * TILE_WIDTH) and rtg.flip_y:
+        rtg.flip_y = False
+    elif not rtg.flip_y and rtg.x > (2 * TILE_WIDTH):
+        rtg.x -= (4 * TILE_WIDTH)
+    elif rtg.x == (0) and not rtg.flip_y:
+        rtg.flip_y  = True
+
     display.refresh()
 
-    time.sleep(1.0)
+    time.sleep(0.25)
 
 
 # refresh the display after everything is set up
 display.refresh()
 
 while True:
-     asyncio.run(main())
+     asyncio.run(main(rocket_tile_grid))
+
 
 
