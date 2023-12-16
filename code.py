@@ -46,11 +46,16 @@ rtc = adafruit_pcf8523.PCF8523(i2c)
 timer = adafruit_pcf8523_timer.Timer(rtc.i2c_device)
 
 # Import time stamp and format to # of cycles
-tsf = open("timestamp.txt", "r")
-imported_ts = tsf.read()
-tsf.close()
-current_cycle = int((int(imported_ts) - MARRIAGE_EPOCH)/3)
-cc_sci_not = "{:.3e}".format(float(current_cycle))
+# If something goes wrong, it is most likely because the clock is dead or something went wrong writing to the timestamp file
+try:
+    tsf = open("timestamp.txt", "r")
+    imported_ts = tsf.read()
+    tsf.close()
+    current_cycle = int((int(imported_ts) - MARRIAGE_EPOCH)/3)
+    cc_sci_not = "{:.3e}".format(float(current_cycle))
+except:
+    current_cycle = 0
+    cc_sci_not = 0
 
 # Display stuff (Images, Bitmaps, Sprites, Font, TileGrids, Groups)
 
@@ -68,7 +73,7 @@ text_group.append(counter_label)
 header.x = int(4.75 * TILE_WIDTH)
 header.y = 2 * TILE_HEIGHT
 
-counter_label.x = 12 * TILE_WIDTH
+counter_label.x = 10 * TILE_WIDTH
 counter_label.y = 8 * TILE_HEIGHT
 
 # Particle system config
@@ -158,12 +163,11 @@ async def on_timer(timer_status, clock, label):
         try:
             with open("/timestamp.txt", "w") as ts:
                 dt = clock.datetime
-                ts.write(time.mktime(dt))
+                ts.write(str(time.mktime(dt)))
                 ts.flush()
-                ts.close()
         except OSError as e:  # Typically when the filesystem isn't writeable...
-            #print("error writing time stamp")
-            pass
+            print(e)
+            
         global current_cycle
         current_cycle += 1
         cc_sci_not = "{:.3e}".format(float(current_cycle))
