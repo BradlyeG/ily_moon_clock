@@ -29,6 +29,7 @@ ROCKET_COLORS = 6 # The number of unique colors in the rocket
 EPOCH_CYCLE = 1 # Number of times light has hit the moon and back from Marriage timestamp to program save
 NUM_PARTICLES = 50 # Number of particles to maintain in the particle sim
 MAX_PARTICLE_SPEED = -35 # Max speed of particles in pixels per update
+MARRIAGE_EPOCH = 1634061600 # Number of seconds since unix epoch to date of marriage
 
 # Component Pins
 spi = board.SPI()
@@ -44,6 +45,13 @@ display.auto_refresh = False
 rtc = adafruit_pcf8523.PCF8523(i2c)
 timer = adafruit_pcf8523_timer.Timer(rtc.i2c_device)
 
+# Import time stamp and format to # of cycles
+tsf = open("timestamp.txt", "r")
+imported_ts = tsf.read()
+tsf.close()
+current_cycle = int((int(imported_ts) - MARRIAGE_EPOCH)/3)
+cc_sci_not = "{:.3e}".format(float(current_cycle))
+
 # Display stuff (Images, Bitmaps, Sprites, Font, TileGrids, Groups)
 
 # Label config
@@ -51,7 +59,7 @@ header_label_text = "I love you to the moon and back"
 font = bitmap_font.load_font("art/pp_opt-16.bdf")
 text_color = 0x0000FF
 header = label.Label(font, text=header_label_text, color=text_color, scale = 1)
-counter_label = label.Label(font, text="0 times!", color=text_color, scale = 1)
+counter_label = label.Label(font, text=str(cc_sci_not) + " times!", color=text_color, scale = 1)
 text_group = displayio.Group()
 text_group.append(header)
 text_group.append(counter_label)
@@ -115,9 +123,6 @@ rocket_group.y = 15 * TILE_HEIGHT
 # Scale up the planet group so the planets are bigger
 planet_group.scale = PLANET_SCALE
 
-# Need to make a list of points for the rocket to follow - x direction only
-#rocket_anim_pts = [8,12,16,20]
-
 planet_rocket = displayio.Group()
 planet_rocket.append(planet_group)
 planet_rocket.append(rocket_group)
@@ -143,9 +148,6 @@ timer.timer_value = 3
 timer.timer_status = False
 timer.timer_enabled = True
 
-# Read timestamp to keep track of cycles and calculate the current cycle
-current_cycle = 1
-
 # What to do when the timer goes off
 # First delete current time stamp file
 # Write new timestamp
@@ -153,21 +155,19 @@ current_cycle = 1
 # Reset the alarm
 async def on_timer(timer_status, clock, label):
     if timer_status:
-        '''try:
-            remove("/timestamp.txt")
-        except:
-            print("couldn't remove timestamp file")
-
         try:
-            with open("/timestamp.txt", "a") as ts:
-                t = clock.datetime
-                ts.write("%d,%d,%d,%d,%d,%d" % (t.tm_mon, t.tm_mday, t.tm_year, t.tm_hour, t.tm_min, t.tm_sec))
+            with open("/timestamp.txt", "w") as ts:
+                dt = clock.datetime
+                ts.write(time.mktime(dt))
                 ts.flush()
+                ts.close()
         except OSError as e:  # Typically when the filesystem isn't writeable...
-            print("error writing time stamp")'''
+            #print("error writing time stamp")
+            pass
         global current_cycle
         current_cycle += 1
-        label.text = "%d times!" % (current_cycle)
+        cc_sci_not = "{:.3e}".format(float(current_cycle))
+        label.text = str(cc_sci_not) + " times!"
         timer.timer_status = False
     else:
         pass
@@ -194,7 +194,6 @@ async def main(rtg):
         rtg.flip_y  = True
 
     display.refresh()
-
     time.sleep(0.25)
 
 
@@ -202,7 +201,7 @@ async def main(rtg):
 display.refresh()
 
 while True:
-     asyncio.run(main(rocket_tile_grid))
+    asyncio.run(main(rocket_tile_grid))
 
 
 
