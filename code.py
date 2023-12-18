@@ -51,7 +51,7 @@ try:
     tsf = open("timestamp.txt", "r")
     imported_ts = tsf.read()
     tsf.close()
-    current_cycle = int((int(imported_ts) - MARRIAGE_EPOCH)/3)
+    current_cycle = (int(time.mktime(rtc.datetime)) - int(imported_ts))/3
     cc_sci_not = "{:.3e}".format(float(current_cycle))
 except:
     current_cycle = 0
